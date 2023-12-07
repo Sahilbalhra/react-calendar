@@ -1,0 +1,136 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+:root {
+  font-family: "Poppins", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: rgb(221, 221, 221);
+}
+
+.calendar_wrapper {
+  width: 450px;
+  background-color: #fff;
+  border-radius: 10px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.calendar_wrapper > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 25px 30px 10px;
+}
+
+.react_calendar {
+  padding-bottom: 25px;
+}
+
+.calendar_wrapper > header .calendar_current_date {
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+header .calendar_icon i {
+  height: 38px;
+  width: 38px;
+  padding: 4px 8px;
+  line-height: 38px;
+  border-radius: 50%;
+  text-align: center;
+  cursor: pointer;
+  color: #878787;
+  font-size: 1.2em;
+}
+
+header .calendar_icon i:hover {
+  background-color: #f2f2f2;
+}
+
+.calendar_wrapper > .react_calendar > ul {
+  display: flex;
+  list-style: none;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.calendar_wrapper > .react_calendar ul li {
+  position: relative;
+  width: calc(100% / 7);
+}
+.calendar_wrapper > .react_calendar > .react_calendar_weeks li {
+  font-weight: 500;
+}
+.calendar_wrapper > .react_calendar > .react_calendar_days li {
+  margin-top: 30px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.react_calendar_days li.react_calendar_inactive {
+  color: #aaa;
+  background: #fff;
+}
+.react_calendar_days li.react_calendar_active {
+  color: #fff;
+}
+
+
+.react_calendar .react_calendar_days li::before {
+  position: absolute;
+  content: "";
+  height: 40px;
+  width: 40px;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  z-index: -1;
+  transform: translate(-50%, -50%);
+}
+
+.react_calendar_days li:hover::before {
+  background: #f2f2f2;
+}
+.react_calendar .react_calendar_days li.react_calendar_inactive:hover::before {
+  background: none;
+  cursor: not-allowed;
+}
+
+/* .react_calendar .react_calendar_days li:hover::before {
+  background: #f2f2f2;
+} */
+
+.react_calendar_days li.react_calendar_active::before {
+  background-color: #fd390e;
+}
+
+.react_calendar .react_calendar_days li.react_calendar_currenct_date::before  {
+  border: 1px solid #fd390e;
+  background: #fff;
+  color:#fd390e
+}
+
