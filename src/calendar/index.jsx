@@ -1,9 +1,7 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import PropTypes from "prop-types";
-import { createRoot } from "react-dom/client";
 
-let root;
 const months = [
   "January",
   "February",
@@ -19,14 +17,14 @@ const months = [
   "December",
 ];
 
-const ReactCalendar = ({ date, setDate }) => {
+const ReactCalendar = React.memo(({ date, setDate, minDate, maxDate }) => {
+  const [daysTab, setDaysTab] = useState(null);
   const currentDateRef = useRef();
-  const daysref = useRef();
   const dateRef = useRef(dayjs());
   const currYear = useRef(dateRef.current.year());
   const currMonth = useRef(dateRef.current.month());
 
-  const renderCalendar = () => {
+  const renderCalendar = useCallback(() => {
     const firstDayofMonth = dateRef.current.date(1).day();
     const lastDateofMonth = dateRef.current.endOf("month").date();
     const lastDayofMonth = dateRef.current.endOf("month").day();
@@ -34,16 +32,14 @@ const ReactCalendar = ({ date, setDate }) => {
       .subtract(1, "month")
       .endOf("month")
       .date();
-
-    const days = [];
+    let daysEleData = [];
     const todayDate = dayjs().toDate();
 
     for (let i = firstDayofMonth; i > 0; i--) {
-      days.push(
-        <li key={`prev-${i}`} className='react_calendar_inactive'>
-          {lastDateofLastMonth - i + 1}
-        </li>
-      );
+      daysEleData.push({
+        class: "react_calendar_inactive",
+        day: lastDateofLastMonth - i + 1,
+      });
     }
 
     for (let i = 1; i <= lastDateofMonth; i++) {
@@ -53,6 +49,7 @@ const ReactCalendar = ({ date, setDate }) => {
         currYear.current === todayDate.getFullYear()
           ? "react_calendar_currenct_date"
           : "";
+
       const currentSelectedDate =
         i === date?.getDate() &&
         currMonth.current === date?.getMonth() &&
@@ -60,37 +57,55 @@ const ReactCalendar = ({ date, setDate }) => {
           ? "react_calendar_active"
           : "";
 
-      days.push(
-        <li
-          key={i}
-          className={currentSelectedDate ? currentSelectedDate : isToday}
-          onClick={() => handleDateClick(i)}
-        >
-          {i}
-        </li>
-      );
+      const isMinDate =
+        currYear.current < minDate.getFullYear()
+          ? "react_calendar_inactive"
+          : currMonth.current < minDate.getMonth() &&
+            currYear.current <= minDate.getFullYear()
+          ? "react_calendar_inactive"
+          : i < minDate.getDate() && currMonth.current === minDate.getMonth()
+          ? "react_calendar_inactive"
+          : "";
+
+      const isMaxDate =
+        currYear.current > maxDate.getFullYear()
+          ? "react_calendar_inactive"
+          : currMonth.current > maxDate.getMonth() &&
+            currYear.current >= maxDate.getFullYear()
+          ? "react_calendar_inactive"
+          : i > maxDate.getDate() && currMonth.current === maxDate.getMonth()
+          ? "react_calendar_inactive"
+          : "";
+
+      daysEleData.push({
+        class: isMinDate
+          ? isMinDate
+          : isMaxDate
+          ? isMaxDate
+          : currentSelectedDate
+          ? currentSelectedDate
+          : isToday,
+        day: i,
+        activeMonth: true,
+      });
     }
 
     for (let i = lastDayofMonth; i < 6; i++) {
-      days.push(
-        <li key={`next-${i}`} className='react_calendar_inactive'>
-          {i - lastDayofMonth + 1}
-        </li>
-      );
+      daysEleData.push({
+        class: "react_calendar_inactive",
+        day: i - lastDayofMonth + 1,
+      });
     }
 
     currentDateRef.current.innerHTML = `${months[currMonth.current]} ${
       currYear.current
     }`;
-    if (!root) {
-      root = createRoot(daysref.current);
-    }
-    root.render(<>{days}</>);
-  };
+    setDaysTab(daysEleData);
+  }, [date]);
 
   useEffect(() => {
     renderCalendar();
-  }, [date]);
+  }, [date, renderCalendar]);
 
   const handleNextClick = () => {
     dateRef.current = dateRef.current.add(1, "month");
@@ -113,17 +128,38 @@ const ReactCalendar = ({ date, setDate }) => {
       .date(day);
     setDate(clickedDate.toDate());
   };
-
-  console.log("render")
-
   return (
     <div className='calendar_wrapper'>
       <header>
-        <div className='calendar_icon' onClick={handlePrevClick}>
+        <div
+          className='calendar_icon'
+          onClick={() => {
+            if (
+              currMonth.current <= minDate.getMonth() &&
+              currYear.current <= minDate.getFullYear()
+            ) {
+              //
+            } else {
+              handlePrevClick();
+            }
+          }}
+        >
           <i className='bi bi-chevron-left'></i>
         </div>
         <p className='calendar_current_date' ref={currentDateRef}></p>
-        <div className='calendar_icon' onClick={handleNextClick}>
+        <div
+          className='calendar_icon'
+          onClick={() => {
+            if (
+              currMonth.current >= maxDate.getMonth() &&
+              currYear.current >= maxDate.getFullYear()
+            ) {
+              //
+            } else {
+              handleNextClick();
+            }
+          }}
+        >
           <i className='bi bi-chevron-right'></i>
         </div>
       </header>
@@ -138,15 +174,30 @@ const ReactCalendar = ({ date, setDate }) => {
           <li>Fri</li>
           <li>Sat</li>
         </ul>
-        <ul className='react_calendar_days' ref={daysref}></ul>
+        <ul className='react_calendar_days'>
+          {daysTab &&
+            daysTab.map((ele, index) => (
+              <li
+                key={index}
+                className={ele.class}
+                onClick={() => ele.activeMonth && handleDateClick(ele.day)}
+              >
+                {ele.day}
+              </li>
+            ))}
+        </ul>
       </div>
     </div>
   );
-};
+});
+
+ReactCalendar.displayName = "ReactCalendar";
 
 ReactCalendar.propTypes = {
   date: PropTypes.instanceOf(Date),
   setDate: PropTypes.func,
+  minDate: PropTypes.instanceOf(Date),
+  maxDate: PropTypes.instanceOf(Date),
 };
 
 export default ReactCalendar;
